@@ -1,0 +1,15 @@
+/Users/mx/dev/C# RH/console_app/bin/Debug/net7.0/console_app
+/Users/mx/dev/C# RH/console_app/bin/Debug/net7.0/console_app.deps.json
+/Users/mx/dev/C# RH/console_app/bin/Debug/net7.0/console_app.runtimeconfig.json
+/Users/mx/dev/C# RH/console_app/bin/Debug/net7.0/console_app.dll
+/Users/mx/dev/C# RH/console_app/bin/Debug/net7.0/console_app.pdb
+/Users/mx/dev/C# RH/console_app/obj/Debug/net7.0/console_app.csproj.AssemblyReference.cache
+/Users/mx/dev/C# RH/console_app/obj/Debug/net7.0/console_app.GeneratedMSBuildEditorConfig.editorconfig
+/Users/mx/dev/C# RH/console_app/obj/Debug/net7.0/console_app.AssemblyInfoInputs.cache
+/Users/mx/dev/C# RH/console_app/obj/Debug/net7.0/console_app.AssemblyInfo.cs
+/Users/mx/dev/C# RH/console_app/obj/Debug/net7.0/console_app.csproj.CoreCompileInputs.cache
+/Users/mx/dev/C# RH/console_app/obj/Debug/net7.0/console_app.dll
+/Users/mx/dev/C# RH/console_app/obj/Debug/net7.0/refint/console_app.dll
+/Users/mx/dev/C# RH/console_app/obj/Debug/net7.0/console_app.pdb
+/Users/mx/dev/C# RH/console_app/obj/Debug/net7.0/console_app.genruntimeconfig.cache
+/Users/mx/dev/C# RH/console_app/obj/Debug/net7.0/ref/console_app.dll
