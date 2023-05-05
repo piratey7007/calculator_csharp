@@ -25,6 +25,7 @@ Result handleInput(string input)
     List<object> parts = new List<object>();
     string? prevType = null;
     StringBuilder number = new StringBuilder();
+    int pCount = 0;
 
     for (int i = 0; i < characters.Length + 1; i++)
     {
@@ -41,6 +42,7 @@ Result handleInput(string input)
         char character = (char)characters.GetValue(i)!;
         if (character >= '0' && character <= '9')
         {
+            // character is a number
             if (prevType != "number")
             {
                 number = new StringBuilder();
@@ -55,9 +57,15 @@ Result handleInput(string input)
             {
                 if (character == '-')
                 {
+                    // Character is a negative sign
                     number = new StringBuilder();
                     number.Append(character);
                     prevType = "number";
+                }
+                else if (character == '+')
+                {
+                    // Character is a positive sign
+                    // Nothing happens
                 }
                 else
                 {
@@ -76,97 +84,148 @@ Result handleInput(string input)
                 prevType = "operation";
             }
         }
-        else if (character == ' ')
-        {
-            // character is a space
-        }
         else if (character == '(' || character == ')')
         {
-            // character is a parenthesis
+            // Character is a parenthesis
+            if (prevType == "operation" && character == ')') return new Result(1, $"90Invalid parenthesis at character {i + 1}.", null);
+            parts.Add(character);
+            if (character == '(') pCount++;
+            else pCount--;
+            if (pCount < 0) return new Result(1, $"94Invalid parenthesis at character {i + 1}", null);
+            prevType = "parenthesis";
+        }
+        else if (character == ' ')
+        {
+            // Character is a space
+            // Nothing happens
         }
         else
         {
             return new Result(1, $"Invalid character at character {i + 1}.", null);
         }
     }
-    Console.WriteLine("_________________");
-    foreach (var part in parts) Console.WriteLine(part);
-    Console.WriteLine("_________________");
+    if (pCount != 0) return new Result(1, "Expected closing parenthesis.", null);
     return new Result(0, null, parts);
 }
 
 Result processParts(List<object> parts)
 {
-    for (int i = 0; i < parts.Count; i++)
+    Result handleOperations(List<object> oParts)
     {
-        if (parts[i] is char operation)
+        if (oParts.Count == 1) return new Result(0, null, oParts[0]);
+        for (int i = 0; i < oParts.Count; i++)
         {
-            if (i == 0 || i == parts.Count - 1)
+            if (oParts[i] is char operation)
             {
-                return new Result(1, $"Invalid order of operations at character {i + 1}", null);
-            }
-            if (operation == '*')
-            {
-                var previous = parts[i - 1];
-                var next = parts[i + 1];
-                if (previous is double && next is double)
+                if (operation == '*' || operation == '/')
                 {
-                    Console.WriteLine($"previous: {previous}, next: {next},  operation: {operation}, answer: {(double)previous * (double)next}");
-                    parts[i] = (double)previous * (double)next;
-                    parts.Remove(previous);
-                    parts.Remove(next);
-                    i = i - 2;
+                    if (i == 0 || i == oParts.Count - 1)
+                    {
+                        return new Result(1, $"Invalid order of operations at character {i + 1}", null);
+                    }
+                    if (operation == '*')
+                    {
+                        var previous = oParts[i - 1];
+                        var next = oParts[i + 1];
+                        if (previous is double && next is double)
+                        {
+                            oParts[i] = (double)previous * (double)next;
+                            oParts.Remove(previous);
+                            oParts.Remove(next);
+                            i = i - 2;
+                        }
+                        else return new Result(1, $"Invalid order of operations at character {i + 1}", null);
+                    }
+                    if (operation == '/')
+                    {
+                        var previous = parts[i - 1];
+                        var next = parts[i + 1];
+                        if (previous is double && next is double)
+                        {
+                            parts[i] = (double)previous / (double)next;
+                            parts.Remove(previous);
+                            parts.Remove(next);
+                            i = i - 2;
+                        }
+                        else return new Result(1, $"Invalid order of operations at character {i + 1}", null);
+                    }
                 }
-                else return new Result(1, $"Invalid order of operations at character {i + 1}", null);
-            }
-            if (operation == '/')
-            {
-                var previous = parts[i - 1];
-                var next = parts[i + 1];
-                if (previous is double && next is double)
-                {
-                    Console.WriteLine($"previous: {previous}, next: {next},  operation: {operation}, answer: {(double)previous / (double)next}");
-                    parts[i] = (double)previous / (double)next;
-                    parts.Remove(previous);
-                    parts.Remove(next);
-                    i = i - 2;
-                }
-                else return new Result(1, $"Invalid order of operations at character {i + 1}", null);
             }
         }
 
-    }
-    for (int i = 0; i < parts.Count; i++)
-    {
-        if (parts[i] is char operation)
+        for (int i = 0; i < oParts.Count; i++)
         {
-            if (operation == '+')
+            if (oParts[i] is char operation)
             {
-                var previous = parts[i - 1];
-                var next = parts[i + 1];
-                if (previous is double && next is double)
+                if (operation == '+')
                 {
-                    parts[i] = (double)previous + (double)next;
-                    parts.Remove(previous);
-                    parts.Remove(next);
-                    i = i - 2;
+                    System.Console.WriteLine(oParts[0]);
+                    System.Console.WriteLine(oParts[1]);
+                    System.Console.WriteLine(oParts[2]);
+
+                    var previous = oParts[i - 1];
+                    var next = oParts[i + 1];
+                    if (previous is double && next is double)
+                    {
+                        oParts[i] = (double)previous + (double)next;
+                        oParts.Remove(previous);
+                        oParts.Remove(next);
+                        i = i - 2;
+                    }
+                    else return new Result(1, "Invalid order of operations", null);
                 }
-                else return new Result(1, "Invalid order of operations", null);
-            }
-            if (operation == '-')
-            {
-                var previous = parts[i - 1];
-                var next = parts[i + 1];
-                if (previous is double && next is double)
+                if (operation == '-')
                 {
-                    parts[i] = (double)previous - (double)next;
+                    var previous = parts[i - 1];
+                    var next = parts[i + 1];
+                    if (previous is double && next is double)
+                    {
+                        parts[i] = (double)previous - (double)next;
+                    }
+                    else return new Result(1, "Invalid order of operations", null);
                 }
-                else return new Result(1, "Invalid order of operations", null);
             }
         }
-
+        return new Result(0, null, oParts[0]);
     }
-    return new Result(0, null, parts[0]);
+    Result handleParentheses(List<object> pParts)
+    {
+        Result findParentheses(List<object> pParts)
+        {
+            int? open = null;
+            for (int i = 0; i < pParts.Count; i++)
+            {
+                if (pParts[i] is char p)
+                {
+                    if (p == '(')
+                    {
+                        open = i;
+                        pParts.RemoveAt(i);
+                    }
+                    else if (p == ')')
+                    {
+                        if (open == null) return new Result(1, "Expected opening parenthesis.", null);
+                        pParts.RemoveAt(i);
+                        return new Result(2, null, pParts.GetRange(open.Value, i - open.Value + 1));
+                    }
+                }
+            }
+            if (open == null) return new Result(0, null, pParts);
+            return new Result(1, "Expected closing parenthesis.", null);
+        }
+        Result fPResult = findParentheses(pParts);
+        double status = fPResult.Status;
+        while (status == 2)
+        {
+            Result res = handleOperations((List<object>)fPResult.Data!);
+            status = res.Status;
+            fPResult = findParentheses(pParts);
+        }
+        if (fPResult.Status != 1) return fPResult;
+        return new Result(0, null, fPResult.Data);
+    }
+    Result res = handleParentheses(parts);
+    return handleOperations(res.Data);
 }
 
 void loop()
