@@ -16,7 +16,6 @@ Start whenever you're ready
 
 Result handleInput(string input)
 {
-    System.Console.WriteLine("handleInput start");
     if (input == null || input == "")
     {
         return new Result(1, "Invalid input. Please enter an operation.", null);
@@ -111,7 +110,6 @@ Result handleInput(string input)
 
 Result handleOperations(List<object> oParts)
 {
-    System.Console.WriteLine("handleOperations start");
     if (oParts.Count == 1) return new Result(0, null, oParts[0]);
     for (int i = 0; i < oParts.Count; i++)
     {
@@ -185,7 +183,6 @@ Result handleOperations(List<object> oParts)
 
 Result findParentheses(List<object> fParts)
 {
-    System.Console.WriteLine("findParentheses start");
     Result run()
     {
         int? open = null;
@@ -203,9 +200,7 @@ Result findParentheses(List<object> fParts)
                     fParts.RemoveAt(open.Value);
                     List<object> range = fParts.GetRange(open.Value, close.Value - open.Value);
                     Result res = handleOperations((List<object>)range!);
-                    System.Console.WriteLine("209: handleOperations:");
                     if (res.Data.GetType() == typeof(double)) Console.WriteLine(res.Data);
-                    else if (res.Data.GetType() == typeof(List<object>)) foreach (object o in res.Data!) System.Console.WriteLine(o);
                     fParts.RemoveRange(open.Value, close.Value - open.Value);
                     fParts.Insert(open.Value, res.Data);
                     run();
@@ -220,19 +215,12 @@ Result findParentheses(List<object> fParts)
 Result processParts(List<object> parts)
 {
     Result res = findParentheses(parts);
-    Console.WriteLine("232: handleAllParentheses:");
-    if (res.Data.GetType() == typeof(double)) Console.WriteLine(res.Data);
-    else if (res.Data.GetType() == typeof(List<object>)) foreach (object o in res.Data!) System.Console.WriteLine(o);
     Result res2 = handleOperations(res.Data);
-    Console.WriteLine("236: handleOperations:");
-    if (res2.Data.GetType() == typeof(double)) Console.WriteLine(res2.Data);
-    else if (res2.Data.GetType() == typeof(List<object>)) foreach (object o in res2.Data!) System.Console.WriteLine(o);
     return res2;
 }
 
 void loop()
 {
-    System.Console.WriteLine("loop");
     string? input = null;
     while (input == null || input == "")
     {
