@@ -16,6 +16,7 @@ Start whenever you're ready
 
 Result handleInput(string input)
 {
+    System.Console.WriteLine("handleInput start");
     if (input == null || input == "")
     {
         return new Result(1, "Invalid input. Please enter an operation.", null);
@@ -108,131 +109,134 @@ Result handleInput(string input)
     return new Result(0, null, parts);
 }
 
+Result handleOperations(List<object> oParts)
+{
+    System.Console.WriteLine("handleOperations start");
+    if (oParts.Count == 1) return new Result(0, null, oParts[0]);
+    for (int i = 0; i < oParts.Count; i++)
+    {
+        if (oParts[i] is char operation)
+        {
+            if (operation == '*')
+            {
+                var previous = oParts[i - 1];
+                var next = oParts[i + 1];
+                if (previous is double && next is double)
+                {
+                    oParts[i] = (double)previous * (double)next;
+                    oParts.Remove(previous);
+                    oParts.Remove(next);
+                    i = i - 2;
+                }
+                else return new Result(1, "Invalid order of operations", null);
+            }
+            if (operation == '/')
+            {
+                var previous = oParts[i - 1];
+                var next = oParts[i + 1];
+                if (previous is double && next is double)
+                {
+                    oParts[i] = (double)previous * (double)next;
+                    oParts.Remove(previous);
+                    oParts.Remove(next);
+                    i = i - 2;
+                }
+                else return new Result(1, "Invalid order of operations", null);
+            }
+        }
+    }
+
+    for (int i = 0; i < oParts.Count; i++)
+    {
+        if (oParts[i] is char operation)
+        {
+            if (operation == '+')
+            {
+                Console.WriteLine(i + " " + oParts.Count);
+                oParts.ForEach(Console.WriteLine);
+                var previous = oParts[i - 1];
+                var next = oParts[i + 1];
+                if (previous is double && next is double)
+                {
+                    oParts[i] = (double)previous + (double)next;
+                    oParts.Remove(previous);
+                    oParts.Remove(next);
+                    i = i - 2;
+                }
+                else return new Result(1, "Invalid order of operations", null);
+            }
+            if (operation == '-')
+            {
+                var previous = oParts[i - 1];
+                var next = oParts[i + 1];
+                if (previous is double && next is double)
+                {
+                    oParts[i] = (double)previous - (double)next;
+                    oParts.Remove(previous);
+                    oParts.Remove(next);
+                    i = i - 2;
+                }
+                else return new Result(1, "Invalid order of operations", null);
+            }
+        }
+    }
+    return new Result(0, null, oParts[0]);
+}
+
+Result findParentheses(List<object> fParts)
+{
+    System.Console.WriteLine("findParentheses start");
+    Result run()
+    {
+        int? open = null;
+        int? close = null;
+        for (int i = 0; i < fParts.Count; i++)
+        {
+            if (fParts[i] is char p)
+            {
+                if (p == '(') open = i;
+                else if (p == ')')
+                {
+                    if (open == null) return new Result(1, "Expected opening parenthesis.", null);
+                    close = i;
+                    fParts.RemoveAt(close.Value);
+                    fParts.RemoveAt(open.Value);
+                    List<object> range = fParts.GetRange(open.Value, close.Value - open.Value);
+                    Result res = handleOperations((List<object>)range!);
+                    System.Console.WriteLine("209: handleOperations:");
+                    if (res.Data.GetType() == typeof(double)) Console.WriteLine(res.Data);
+                    else if (res.Data.GetType() == typeof(List<object>)) foreach (object o in res.Data!) System.Console.WriteLine(o);
+                    fParts.RemoveRange(open.Value, close.Value - open.Value);
+                    fParts.Insert(open.Value, res.Data);
+                    run();
+                }
+            }
+        }
+        return new Result(0, null, fParts);
+    }
+    return run();
+}
+
 Result processParts(List<object> parts)
 {
-    Result handleOperations(List<object> oParts)
-    {
-        if (oParts.Count == 1) return new Result(0, null, oParts[0]);
-        for (int i = 0; i < oParts.Count; i++)
-        {
-            if (oParts[i] is char operation)
-            {
-                if (operation == '*' || operation == '/')
-                {
-                    if (i == 0 || i == oParts.Count - 1)
-                    {
-                        return new Result(1, $"Invalid order of operations at character {i + 1}", null);
-                    }
-                    if (operation == '*')
-                    {
-                        var previous = oParts[i - 1];
-                        var next = oParts[i + 1];
-                        if (previous is double && next is double)
-                        {
-                            oParts[i] = (double)previous * (double)next;
-                            oParts.Remove(previous);
-                            oParts.Remove(next);
-                            i = i - 2;
-                        }
-                        else return new Result(1, $"Invalid order of operations at character {i + 1}", null);
-                    }
-                    if (operation == '/')
-                    {
-                        var previous = parts[i - 1];
-                        var next = parts[i + 1];
-                        if (previous is double && next is double)
-                        {
-                            parts[i] = (double)previous / (double)next;
-                            parts.Remove(previous);
-                            parts.Remove(next);
-                            i = i - 2;
-                        }
-                        else return new Result(1, $"Invalid order of operations at character {i + 1}", null);
-                    }
-                }
-            }
-        }
-
-        for (int i = 0; i < oParts.Count; i++)
-        {
-            if (oParts[i] is char operation)
-            {
-                if (operation == '+')
-                {
-                    System.Console.WriteLine(oParts[0]);
-                    System.Console.WriteLine(oParts[1]);
-                    System.Console.WriteLine(oParts[2]);
-
-                    var previous = oParts[i - 1];
-                    var next = oParts[i + 1];
-                    if (previous is double && next is double)
-                    {
-                        oParts[i] = (double)previous + (double)next;
-                        oParts.Remove(previous);
-                        oParts.Remove(next);
-                        i = i - 2;
-                    }
-                    else return new Result(1, "Invalid order of operations", null);
-                }
-                if (operation == '-')
-                {
-                    var previous = parts[i - 1];
-                    var next = parts[i + 1];
-                    if (previous is double && next is double)
-                    {
-                        parts[i] = (double)previous - (double)next;
-                    }
-                    else return new Result(1, "Invalid order of operations", null);
-                }
-            }
-        }
-        return new Result(0, null, oParts[0]);
-    }
-    Result handleParentheses(List<object> pParts)
-    {
-        Result findParentheses(List<object> pParts)
-        {
-            int? open = null;
-            for (int i = 0; i < pParts.Count; i++)
-            {
-                if (pParts[i] is char p)
-                {
-                    if (p == '(')
-                    {
-                        open = i;
-                        pParts.RemoveAt(i);
-                    }
-                    else if (p == ')')
-                    {
-                        if (open == null) return new Result(1, "Expected opening parenthesis.", null);
-                        pParts.RemoveAt(i);
-                        return new Result(2, null, pParts.GetRange(open.Value, i - open.Value + 1));
-                    }
-                }
-            }
-            if (open == null) return new Result(0, null, pParts);
-            return new Result(1, "Expected closing parenthesis.", null);
-        }
-        Result fPResult = findParentheses(pParts);
-        double status = fPResult.Status;
-        while (status == 2)
-        {
-            Result res = handleOperations((List<object>)fPResult.Data!);
-            status = res.Status;
-            fPResult = findParentheses(pParts);
-        }
-        if (fPResult.Status != 1) return fPResult;
-        return new Result(0, null, fPResult.Data);
-    }
-    Result res = handleParentheses(parts);
-    return handleOperations(res.Data);
+    Result res = findParentheses(parts);
+    Console.WriteLine("232: handleAllParentheses:");
+    if (res.Data.GetType() == typeof(double)) Console.WriteLine(res.Data);
+    else if (res.Data.GetType() == typeof(List<object>)) foreach (object o in res.Data!) System.Console.WriteLine(o);
+    Result res2 = handleOperations(res.Data);
+    Console.WriteLine("236: handleOperations:");
+    if (res2.Data.GetType() == typeof(double)) Console.WriteLine(res2.Data);
+    else if (res2.Data.GetType() == typeof(List<object>)) foreach (object o in res2.Data!) System.Console.WriteLine(o);
+    return res2;
 }
 
 void loop()
 {
+    System.Console.WriteLine("loop");
     string? input = null;
     while (input == null || input == "")
     {
+        Console.Write("Q: ");
         input = Console.ReadLine();
     }
     var res = handleInput(input);
@@ -263,7 +267,7 @@ void loop()
         Console.WriteLine("Something went wrong. Please try again.");
         loop();
     }
-    Console.WriteLine((double)processedRes.Data);
+    Console.WriteLine($"A: {(double)processedRes.Data}");
     loop();
 };
 
