@@ -24,7 +24,7 @@ Result handleInput(string input)
     Array characters = input.ToCharArray();
     List<object> parts = new List<object>();
     string? prevType = null;
-    StringBuilder number = new StringBuilder();
+    StringBuilder number = null;
     int pCount = 0;
 
     for (int i = 0; i < characters.Length + 1; i++)
@@ -32,7 +32,7 @@ Result handleInput(string input)
         if (i == characters.Length)
         {
             double finalNumber;
-            if (number.Length != 0)
+            if (number != null && number.Length != 0)
             {
                 finalNumber = Convert.ToDouble(number.ToString());
                 parts.Add(finalNumber);
@@ -72,22 +72,33 @@ Result handleInput(string input)
                     return new Result(1, $"Invalid operation at character {i + 1}. Please enter a valid operation.", null);
                 }
             }
-            else
+            else if (prevType == "number")
             {
                 double finalNumber;
                 if (number.Length != 0)
                 {
                     finalNumber = Convert.ToDouble(number.ToString());
                     parts.Add(finalNumber);
+                    number = null;
                 }
-                parts.Add(character);
-                prevType = "operation";
             }
+            parts.Add(character);
+            prevType = "operation";
         }
         else if (character == '(' || character == ')')
         {
             // Character is a parenthesis
             if (prevType == "operation" && character == ')') return new Result(1, $"90Invalid parenthesis at character {i + 1}.", null);
+            else if (prevType == "number")
+            {
+                double finalNumber;
+                if (number.Length != 0)
+                {
+                    finalNumber = Convert.ToDouble(number.ToString());
+                    parts.Add(finalNumber);
+                    number = null;
+                }
+            }
             parts.Add(character);
             if (character == '(') pCount++;
             else pCount--;
@@ -101,6 +112,7 @@ Result handleInput(string input)
         }
         else
         {
+            System.Console.WriteLine(character);
             return new Result(1, $"Invalid character at character {i + 1}.", null);
         }
     }
@@ -134,7 +146,7 @@ Result handleOperations(List<object> oParts)
                 var next = oParts[i + 1];
                 if (previous is double && next is double)
                 {
-                    oParts[i] = (double)previous * (double)next;
+                    oParts[i] = (double)previous / (double)next;
                     oParts.Remove(previous);
                     oParts.Remove(next);
                     i = i - 2;
@@ -150,8 +162,6 @@ Result handleOperations(List<object> oParts)
         {
             if (operation == '+')
             {
-                Console.WriteLine(i + " " + oParts.Count);
-                oParts.ForEach(Console.WriteLine);
                 var previous = oParts[i - 1];
                 var next = oParts[i + 1];
                 if (previous is double && next is double)
@@ -185,32 +195,42 @@ Result findParentheses(List<object> fParts)
 {
     Result run()
     {
-        int? open = null;
-        int? close = null;
-        for (int i = 0; i < fParts.Count; i++)
+        while (true)
         {
-            if (fParts[i] is char p)
+            int? open = null;
+            bool found = false;
+            for (int i = 0; i < fParts.Count; i++)
             {
-                if (p == '(') open = i;
-                else if (p == ')')
+                if (fParts[i] is char p)
                 {
-                    if (open == null) return new Result(1, "Expected opening parenthesis.", null);
-                    close = i;
-                    fParts.RemoveAt(close.Value);
-                    fParts.RemoveAt(open.Value);
-                    List<object> range = fParts.GetRange(open.Value, close.Value - open.Value);
-                    Result res = handleOperations((List<object>)range!);
-                    if (res.Data.GetType() == typeof(double)) Console.WriteLine(res.Data);
-                    fParts.RemoveRange(open.Value, close.Value - open.Value);
-                    fParts.Insert(open.Value, res.Data);
-                    run();
+                    if (p == '(')
+                    {
+                        open = i;
+                    }
+                    else if (p == ')')
+                    {
+                        found = true;
+                        if (open == null) return new Result(1, "Expected opening parenthesis.", null);
+                        List<object> range = fParts.GetRange(open.Value + 1, i - open.Value - 1);
+                        Result res = handleOperations((List<object>)range!);
+                        fParts.RemoveRange(open.Value, i - open.Value + 1);
+                        fParts.Insert(open.Value, res.Data);
+                        foreach (var item in fParts)
+                        {
+                            System.Console.WriteLine(item);
+                        }
+                        i = open.Value; // Update loop index
+                        break; // Break the loop and start over
+                    }
                 }
             }
+            if (!found) break;
         }
         return new Result(0, null, fParts);
     }
     return run();
 }
+
 
 Result processParts(List<object> parts)
 {
