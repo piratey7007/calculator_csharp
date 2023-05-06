@@ -24,6 +24,7 @@ Result handleInput(string input)
     Array characters = input.ToCharArray();
     List<object> parts = new List<object>();
     string? prevType = null;
+    char? prevChar = null;
     StringBuilder number = null;
     int pCount = 0;
 
@@ -49,6 +50,7 @@ Result handleInput(string input)
             }
             number.Append(character);
             prevType = "number";
+            prevChar = character;
         }
         else if (character == '+' || character == '-' || character == '*' || character == '/')
         {
@@ -61,6 +63,7 @@ Result handleInput(string input)
                     number = new StringBuilder();
                     number.Append(character);
                     prevType = "number";
+                    prevChar = character;
                 }
                 else if (character == '+')
                 {
@@ -84,6 +87,7 @@ Result handleInput(string input)
             }
             parts.Add(character);
             prevType = "operation";
+            prevChar = character;
         }
         else if (character == '(' || character == ')')
         {
@@ -99,11 +103,19 @@ Result handleInput(string input)
                     number = null;
                 }
             }
+            else if (prevType == "parenthesis")
+            {
+                if (prevChar == ')' && character == '(')
+                {
+                    parts.Add('*');
+                }
+            }
             parts.Add(character);
             if (character == '(') pCount++;
             else pCount--;
             if (pCount < 0) return new Result(1, $"94Invalid parenthesis at character {i + 1}", null);
             prevType = "parenthesis";
+            prevChar = character;
         }
         else if (character == ' ')
         {
@@ -112,7 +124,6 @@ Result handleInput(string input)
         }
         else
         {
-            System.Console.WriteLine(character);
             return new Result(1, $"Invalid character at character {i + 1}.", null);
         }
     }
@@ -215,10 +226,6 @@ Result findParentheses(List<object> fParts)
                         Result res = handleOperations((List<object>)range!);
                         fParts.RemoveRange(open.Value, i - open.Value + 1);
                         fParts.Insert(open.Value, res.Data);
-                        foreach (var item in fParts)
-                        {
-                            System.Console.WriteLine(item);
-                        }
                         i = open.Value; // Update loop index
                         break; // Break the loop and start over
                     }
